@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { axiosPrivate } from './client';
 
 export interface Permission {
   id: number;
@@ -35,50 +35,50 @@ export interface AssignPermissionRequest {
 // Role management APIs
 export const roleApi = {
   // Get all roles
-  getRoles: () => apiClient.get<{ roles: Role[] }>('/api/v1/roles'),
+  getRoles: () => axiosPrivate.get<{ roles: Role[] }>('/roles'),
 
   // Get role by ID
-  getRole: (id: number) => apiClient.get<{ role: Role }>(`/api/v1/roles/${id}`),
+  getRole: (id: number) => axiosPrivate.get<{ role: Role }>(`/roles/${id}`),
 
   // Create new role
   createRole: (data: CreateRoleRequest) => 
-    apiClient.post<{ role: Role }>('/api/v1/roles', data),
+    axiosPrivate.post<{ role: Role }>('/roles', data),
 
   // Update role
   updateRole: (id: number, data: CreateRoleRequest) => 
-    apiClient.put<{ role: Role }>(`/api/v1/roles/${id}`, data),
+    axiosPrivate.put<{ role: Role }>(`/roles/${id}`, data),
 
   // Delete role
   deleteRole: (id: number) => 
-    apiClient.delete<{ message: string }>(`/api/v1/roles/${id}`),
+    axiosPrivate.delete<{ message: string }>(`/roles/${id}`),
 
   // Assign role to user
   assignRoleToUser: (data: AssignRoleRequest) => 
-    apiClient.post<{ message: string }>('/api/v1/user-roles/assign', data),
+    axiosPrivate.post<{ message: string }>('/user-roles/assign', data),
 
   // Remove role from user
   removeRoleFromUser: (userId: number, roleId: number) => 
-    apiClient.delete<{ message: string }>(`/api/v1/user-roles/user/${userId}/role/${roleId}`),
+    axiosPrivate.delete<{ message: string }>(`/user-roles/user/${userId}/role/${roleId}`),
 
   // Get user roles
   getUserRoles: (userId: number) => 
-    apiClient.get<{ roles: Role[] }>(`/api/v1/user-roles/user/${userId}`),
+    axiosPrivate.get<{ roles: Role[] }>(`/user-roles/user/${userId}`),
 
   // Get user permissions
   getUserPermissions: (userId: number) => 
-    apiClient.get<{ permissions: string[] }>(`/api/v1/user-roles/user/${userId}/permissions`),
+    axiosPrivate.get<{ permissions: string[] }>(`/user-roles/user/${userId}/permissions`),
 };
 
 // Permission management APIs
 export const permissionApi = {
   // Get all permissions
-  getPermissions: () => apiClient.get<{ permissions: Permission[] }>('/api/v1/permissions'),
+  getPermissions: () => axiosPrivate.get<{ permissions: Permission[] }>('/permissions'),
 
   // Assign permission to role
   assignPermissionToRole: (data: AssignPermissionRequest) => 
-    apiClient.post<{ message: string }>('/api/v1/role-permissions/assign', data),
+    axiosPrivate.post<{ message: string }>('/role-permissions/assign', data),
 
   // Remove permission from role
   removePermissionFromRole: (roleId: number, permissionId: number) => 
-    apiClient.delete<{ message: string }>(`/api/v1/role-permissions/role/${roleId}/permission/${permissionId}`),
+    axiosPrivate.delete<{ message: string }>(`/role-permissions/role/${roleId}/permission/${permissionId}`),
 };

@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { signupRequest } from "@/api/auth";
+import { getUserRequest } from "@/api/user";
+import { useAuthStore } from "@/state/user.state";
 import { Shield, Eye, EyeOff } from "lucide-react";
 
 const SignUp: React.FC = () => {
@@ -17,6 +19,7 @@ const SignUp: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { login } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,13 +45,12 @@ const SignUp: React.FC = () => {
           description: "Please check your email for verification.",
         });
 
-        const sessionData = {
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token
+        const userRes = await getUserRequest();
+        const user = userRes?.data;
+        if (user) {
+          login(data.access_token, data.refresh_token, user);
+          navigate("/");
         }
-
-        localStorage.setItem("session", JSON.stringify(sessionData));
-        navigate("/")
        }
     } catch (e: any) {
       toast({

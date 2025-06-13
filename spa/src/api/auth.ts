@@ -18,3 +18,7 @@ export const refreshTokenRequest = async (data) => {
 export const signOutRequest = async () => {
     return axiosV1Public.post('/auth/logout');
 }
+
+export const verify2FARequest = async (data: {email: string, code: string}) => {
+    return axiosV1Public.post('/auth/verify-2fa', data)
+}

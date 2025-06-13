@@ -1,0 +1,7 @@
+FROM node:20-alpine
+
+WORKDIR /spa
+
+COPY ./spa ./
+
+EXPOSE 3000

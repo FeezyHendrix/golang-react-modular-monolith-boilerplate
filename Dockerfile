@@ -20,4 +20,4 @@ RUN apk add --no-cache tzdata
 
 COPY --from=build-server /app/spa/build /html/
 
-ENTRYPOINT [ "insightone-server" ]
+ENTRYPOINT [ "echo-template-server" ]

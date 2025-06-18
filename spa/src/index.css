@@ -102,7 +102,7 @@
   min-height: 250px;
 }
 
-.insight-card {
+.card-component {
   @apply rounded-lg shadow-md p-6 border border-border transition-shadow hover:shadow-lg;
 }
 

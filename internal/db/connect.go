@@ -2,10 +2,9 @@ package db
 
 import (
 	"fmt"
-	"log"
 
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
-
 	"gorm.io/gorm"
 )
 
@@ -18,22 +17,25 @@ func Connect(cfg *Config, deps *Dependencies) (*DB, error) {
 
 	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("Failed to connect to database")
+		return nil, fmt.Errorf("failed to connect to database at %s:%s/%s: %w", cfg.Host, cfg.Port, cfg.Database, err)
 	}
 
 	
 	sqlDB, err := conn.DB()
 	if err != nil {
-		log.Fatal("Failed to get generic database object")
-	} else {
-		log.Println("Successfully connected to the database")
+		return nil, fmt.Errorf("failed to get database instance: %w", err)
 	}
 	
 	if err := sqlDB.Ping(); err != nil {
-		log.Fatal("Database ping failed:", err)
+		return nil, fmt.Errorf("database ping failed - database may be unreachable: %w", err)
 	}
+
+	deps.Logger.Info("Successfully connected to database", 
+		zap.String("host", cfg.Host), 
+		zap.String("database", cfg.Database),
+	)
 
 	return &DB{
 		Conn: conn,
-	}, err
+	}, nil
 }

@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				insight: {
+				brand: {
 					DEFAULT: '#10B981', 					foreground: '#FFFFFF',
 					secondary: '#2563EB', 					accent: '#F59E0B', 					error: '#EF4444', 				}
 			},

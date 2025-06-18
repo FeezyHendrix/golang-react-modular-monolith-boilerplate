@@ -29,12 +29,13 @@ services:
   spa:
     container_name: echo-template-spa
     build:
-      context: ./spa
+      context: .
       dockerfile: Dockerfile.spa
     ports:
       - "3000:3000"
     env_file:
       - ./env/spa.env
+    entrypoint: "npm run dev:docker"
     volumes:
       - ./spa:/spa
       - /spa/node_modules

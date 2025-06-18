@@ -35,21 +35,31 @@ type Config struct {
 
 func main() {
 	cfg := &Config{}
-	envconfig.MustProcess("", cfg)
+	if err := envconfig.Process("", cfg); err != nil {
+		log.Fatalf("Failed to load configuration: %v\n\nPlease ensure all required environment variables are set:\n%s", err, getRequiredEnvVars())
+	}
 
 	lgr, err := initLogger(cfg)
 	if err != nil {
-		log.Fatal("failed to initialize logger", err)
+		log.Fatalf("Failed to initialize logger: %v\n\nPlease check your LOG_LEVEL environment variable. Valid values are: debug, info, warn, error, dpanic, panic, fatal", err)
 	}
 
 	dbConn, err := db.Connect(cfg.DBConfig, &db.Dependencies{
 		Logger: lgr,
 	})
-
-	dbConn.MigrateAllFields()
-
 	if err != nil {
-		lgr.Fatal("failed to connect to database", zap.Error(err))
+		lgr.Fatal("Failed to connect to database. Please check your database configuration and ensure PostgreSQL is running.", 
+			zap.Error(err),
+			zap.String("host", cfg.DBConfig.Host),
+			zap.String("port", cfg.DBConfig.Port),
+			zap.String("database", cfg.DBConfig.Database),
+			zap.String("user", cfg.DBConfig.User),
+		)
+	}
+
+	err = dbConn.MigrateAllFields()
+	if err != nil {
+		lgr.Fatal("Failed to run database migrations", zap.Error(err))
 	}
 
 	valdtr := validator.NewValidator()
@@ -104,10 +114,13 @@ func main() {
 		}
 	}()
 
-	lgr.Info("server started")
+	lgr.Info("Server starting", zap.String("port", cfg.APIConfig.Port), zap.String("environment", string(cfg.Environment)))
 	err = apiServer.ListenAndServe()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		lgr.Error("failed to start server", zap.Error(err))
+		lgr.Error("Failed to start server. Please check if the port is already in use or if you have permission to bind to this port.", 
+			zap.Error(err),
+			zap.String("port", cfg.APIConfig.Port),
+		)
 	}
 }
 
@@ -133,4 +146,47 @@ func initLogger(cfg *Config) (*zap.Logger, error) {
 	}
 
 	return zcfg.Build()
+}
+
+func getRequiredEnvVars() string {
+	return `
+Required Environment Variables:
+=============================
+
+Database Configuration:
+- POSTGRES_USER: PostgreSQL username
+- POSTGRES_HOST: PostgreSQL host (e.g., localhost)
+- POSTGRES_PASSWORD: PostgreSQL password
+- POSTGRES_PORT: PostgreSQL port (e.g., 5432)
+- POSTGRES_DB: Database name
+- POSTGRES_CONNECT_TIMEOUT: Connection timeout in seconds
+- POSTGRES_SSL_MODE: SSL mode (e.g., disable, require)
+- POSTGRES_DB_SCHEMA: Database schema (e.g., public)
+
+API Configuration:
+- PORT: Server port number (e.g., 8080)
+
+Authentication Configuration:
+- AUTHENTICATION_JWT_SECRET: JWT signing secret (should be a long, random string)
+- AUTHENTICATION__PASSWORD_RESET_TOKEN_ENCRYPTION_KEY: Encryption key for password reset tokens
+- AUTHENTICATION__PASSWORD_RESET_URL: URL for password reset page
+
+Email Configuration:
+- RESEND_API_KEY: API key for Resend email service
+
+Example environment file (server.env):
+PORT=8080
+POSTGRES_USER=postgres
+POSTGRES_HOST=localhost
+POSTGRES_PASSWORD=your_password
+POSTGRES_PORT=5432
+POSTGRES_DB=your_database
+POSTGRES_CONNECT_TIMEOUT=10
+POSTGRES_SSL_MODE=disable
+POSTGRES_DB_SCHEMA=public
+AUTHENTICATION_JWT_SECRET=your_jwt_secret_here
+AUTHENTICATION__PASSWORD_RESET_TOKEN_ENCRYPTION_KEY=your_encryption_key_here
+AUTHENTICATION__PASSWORD_RESET_URL=http://localhost:3000/reset-password
+RESEND_API_KEY=your_resend_api_key_here
+`
 }

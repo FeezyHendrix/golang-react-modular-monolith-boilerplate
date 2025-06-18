@@ -31,9 +31,9 @@ const VerifyOTP: React.FC = () => {
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted/30 p-4">
       <div className="mb-8 flex flex-col items-center">
         <div className="h-20 w-20 rounded-full bg-primary-foreground flex items-center justify-center">
-          <span className="text-2xl font-bold text-primary">IQ</span>
+          <span className="text-2xl font-bold text-primary">EA</span>
         </div>
-        <h1 className="mt-4 text-2xl font-bold">InsightOne Analytics</h1>
+        <h1 className="mt-4 text-2xl font-bold">Echo App</h1>
       </div>
       
       <Card className="w-full max-w-md">

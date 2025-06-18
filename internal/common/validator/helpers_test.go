@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ValidateAndBindJSON is a helper function to bind and validate JSON payloads
 func ValidateAndBindJSON[T any](c echo.Context, payload *T) error {
 	if err := c.Bind(payload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -32,7 +31,6 @@ func ValidateAndBindJSON[T any](c echo.Context, payload *T) error {
 	return nil
 }
 
-// ValidateAndBindParams is a helper function to bind and validate URL parameters
 func ValidateAndBindParams[T any](c echo.Context, params *T) error {
 	if err := c.Bind(params); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameters")
@@ -51,7 +49,6 @@ func ValidateAndBindParams[T any](c echo.Context, params *T) error {
 	return nil
 }
 
-// ValidateAndBindQuery is a helper function to bind and validate query parameters
 func ValidateAndBindQuery[T any](c echo.Context, query *T) error {
 	if err := c.Bind(query); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid query parameters")
@@ -70,7 +67,6 @@ func ValidateAndBindQuery[T any](c echo.Context, query *T) error {
 	return nil
 }
 
-// ParseAndValidateID is a helper function to parse and validate ID parameters
 func ParseAndValidateID(c echo.Context, paramName string) (uint, error) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
@@ -89,7 +85,6 @@ func ParseAndValidateID(c echo.Context, paramName string) (uint, error) {
 	return uint(id), nil
 }
 
-// ValidationMiddleware creates a middleware that validates request payloads
 func ValidationMiddleware[T any](payload T) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -98,14 +93,12 @@ func ValidationMiddleware[T any](payload T) echo.MiddlewareFunc {
 				return err
 			}
 
-			// Store validated payload in context
 			c.Set("validatedPayload", req)
 			return next(c)
 		}
 	}
 }
 
-// GetValidatedPayload retrieves the validated payload from context
 func GetValidatedPayload[T any](c echo.Context) T {
 	payload, ok := c.Get("validatedPayload").(T)
 	if !ok {
@@ -115,7 +108,6 @@ func GetValidatedPayload[T any](c echo.Context) T {
 	return payload
 }
 
-// ValidateEmail checks if the email format is valid and not empty
 func ValidateEmail(email string) error {
 	if email == "" {
 		return &ValidationErrors{
@@ -125,7 +117,6 @@ func ValidateEmail(email string) error {
 		}
 	}
 
-	// Basic email validation (the validator library will do more thorough validation)
 	if len(email) > 255 {
 		return &ValidationErrors{
 			Errors: []ValidationError{
@@ -137,7 +128,6 @@ func ValidateEmail(email string) error {
 	return nil
 }
 
-// ValidatePassword checks if the password meets strength requirements
 func ValidatePassword(password string) error {
 	errors := []ValidationError{}
 
@@ -158,7 +148,6 @@ func ValidatePassword(password string) error {
 			})
 		}
 
-		// Check for strong password if not empty and length is valid
 		if len(password) >= 8 && len(password) <= 128 {
 			if !validateStrongPassword(&mockFieldLevel{value: password}) {
 				errors = append(errors, ValidationError{
@@ -177,7 +166,6 @@ func ValidatePassword(password string) error {
 	return nil
 }
 
-// mockFieldLevel is a helper struct to use custom validation functions outside of the validator
 type mockFieldLevel struct {
 	value string
 }
@@ -230,7 +218,6 @@ func (m *mockFieldLevel) Top() interface{} {
 	return nil
 }
 
-// ValidateRoleName validates role names according to business rules
 func ValidateRoleName(name string) error {
 	if name == "" {
 		return &ValidationErrors{

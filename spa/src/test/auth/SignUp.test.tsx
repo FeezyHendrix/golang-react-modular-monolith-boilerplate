@@ -5,12 +5,10 @@ import { BrowserRouter } from 'react-router-dom'
 import SignUp from '../../pages/auth/SignUp'
 import * as authAPI from '../../api/auth'
 
-// Mock the auth API
 vi.mock('../../api/auth', () => ({
   signupRequest: vi.fn(),
 }))
 
-// Mock react-router-dom navigation
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
@@ -20,7 +18,6 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-// Mock the toast hook
 const mockToast = vi.fn()
 vi.mock('../../hooks/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
@@ -128,14 +125,11 @@ describe('SignUp Component', () => {
     const passwordInput = screen.getByLabelText('Password')
     const toggleButton = screen.getByLabelText('Show password')
     
-    // Initially password should be hidden
     expect(passwordInput).toHaveAttribute('type', 'password')
     
-    // Click to show password
     await user.click(toggleButton)
     expect(passwordInput).toHaveAttribute('type', 'text')
     
-    // Click to hide password again
     await user.click(toggleButton)
     expect(passwordInput).toHaveAttribute('type', 'password')
   })
@@ -174,7 +168,6 @@ describe('SignUp Component', () => {
   it('shows loading state during form submission', async () => {
     const user = userEvent.setup()
     
-    // Mock a delayed response
     vi.mocked(authAPI.signupRequest).mockImplementation(() => 
       new Promise(resolve => setTimeout(() => resolve({
         data: {
@@ -196,11 +189,9 @@ describe('SignUp Component', () => {
     await user.type(passwordInput, 'password123')
     await user.click(submitButton)
     
-    // Should show loading state
     expect(screen.getByRole('button', { name: /creating account.../i })).toBeInTheDocument()
     expect(submitButton).toBeDisabled()
     
-    // Wait for completion
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/')
     })

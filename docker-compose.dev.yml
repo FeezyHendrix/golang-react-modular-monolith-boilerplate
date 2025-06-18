@@ -1,29 +1,18 @@
 version: "3.9"
 
 services:
-  # Go Backend Server
   server:
-    container_name: echo-server
+    container_name: echo-template-server
     restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile.server
+    entrypoint: "air -c .air.toml"
     ports:
       - "8080:8080"
-      - "2345:2345"  # Delve debugger port
-    environment:
-      - PORT=8080
-      - LOG_LEVEL=debug
-      - ENVIRONMENT=development
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=echoboilerplate_dev
-      - POSTGRES_SSL_MODE=disable
-      - AUTHENTICATION_JWT_SECRET=dev_jwt_secret_key_32_characters_min
-      - AUTHENTICATION__PASSWORD_RESET_TOKEN_ENCRYPTION_KEY=dev_password_reset_key_32_chars_here
-      - USERS__INVITE_ENCRYPTION_KEY=dev_user_invite_key_32_chars_here
+      - "2345:2345"  
+    env_file:
+      - ./env/server.env
     volumes:
       - .:/app
       - /app/spa/build
@@ -37,17 +26,15 @@ services:
       timeout: 10s
       retries: 3
 
-  # React Frontend (SPA)
   spa:
-    container_name: echo-spa
+    container_name: echo-template-spa
     build:
       context: ./spa
-      dockerfile: ../Dockerfile.spa
+      dockerfile: Dockerfile.spa
     ports:
       - "3000:3000"
-    environment:
-      - PORT=3000
-      - REACT_APP_API_URL=http://localhost:8080
+    env_file:
+      - ./env/spa.env
     volumes:
       - ./spa:/spa
       - /spa/node_modules
@@ -59,16 +46,14 @@ services:
       timeout: 10s
       retries: 3
 
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: echo-postgres
+    container_name: echo-template-postgres
     restart: unless-stopped
     environment:
       - POSTGRES_DB=echoboilerplate_dev
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     ports:
       - "5432:5432"
     volumes:
@@ -82,10 +67,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis (optional - for caching, sessions, etc.)
   redis:
     image: redis:7-alpine
-    container_name: echo-redis
+    container_name: echo-template-redis
     restart: unless-stopped
     ports:
       - "6379:6379"

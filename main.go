@@ -73,7 +73,6 @@ func main() {
 
 	permissionsSvc := permissions.NewService(dbConn.Conn)
 	
-	// Seed default roles and permissions
 	err = permissionsSvc.SeedDefaultData()
 	if err != nil {
 		lgr.Warn("failed to seed default permissions data", zap.Error(err))

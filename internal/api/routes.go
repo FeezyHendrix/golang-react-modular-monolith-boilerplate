@@ -13,10 +13,8 @@ import (
 func (a *api) configureRoutes() http.Handler {
 	e := echo.New()
 	
-	// Set up custom validator
 	e.Validator = validator.NewValidator()
 	
-	// Add global middleware
 	e.Use(validator.ErrorHandlerMiddleware(a.Logger))
 	e.Use(validator.RequestLoggingMiddleware(a.Logger))
 	e.Use(validator.SecurityValidationMiddleware())
@@ -37,7 +35,6 @@ func (a *api) configureRoutes() http.Handler {
 
 	v1.GET("/user/profile", a.UsersSvc.GetUserProfile)
 
-	// Role management routes - require role management permissions
 	roles := v1.Group("/roles", permissions.RequirePermission(permissions.PermissionRoleRead))
 	roles.GET("", a.GetRoles)
 	roles.GET("/:id", a.GetRole)
@@ -45,18 +42,15 @@ func (a *api) configureRoutes() http.Handler {
 	roles.PUT("/:id", a.UpdateRole, permissions.RequirePermission(permissions.PermissionRoleWrite))
 	roles.DELETE("/:id", a.DeleteRole, permissions.RequirePermission(permissions.PermissionRoleDelete))
 
-	// Permission management routes
 	perms := v1.Group("/permissions", permissions.RequirePermission(permissions.PermissionRoleRead))
 	perms.GET("", a.GetPermissions)
 
-	// User role assignment routes - require user management permissions
 	userRoles := v1.Group("/user-roles", permissions.RequirePermission(permissions.PermissionUserWrite))
 	userRoles.POST("/assign", a.AssignRoleToUser)
 	userRoles.DELETE("/user/:userId/role/:roleId", a.RemoveRoleFromUser)
 	userRoles.GET("/user/:userId", a.GetUserRoles, permissions.RequirePermission(permissions.PermissionUserRead))
 	userRoles.GET("/user/:userId/permissions", a.GetUserPermissions, permissions.RequirePermission(permissions.PermissionUserRead))
 
-	// Role permission assignment routes - require role management permissions
 	rolePerms := v1.Group("/role-permissions", permissions.RequirePermission(permissions.PermissionRoleWrite))
 	rolePerms.POST("/assign", a.AssignPermissionToRole)
 	rolePerms.DELETE("/role/:roleId/permission/:permissionId", a.RemovePermissionFromRole)
@@ -64,7 +58,6 @@ func (a *api) configureRoutes() http.Handler {
 	e.Use(echoMW.GzipWithConfig(echoMW.GzipConfig{
 		Level: 5,
 	}))
-	// Serve SPA
 	e.Use(echoMW.StaticWithConfig(echoMW.StaticConfig{
 		Root:   a.StaticDir,
 		Index:  "index.html",

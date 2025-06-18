@@ -58,36 +58,26 @@ func (s *service) PostEnable2FA(c echo.Context) error {
 		return c.NoContent(http.StatusNotFound)
 	}
 
-	// Verify password
-	// match, err := passwords.HashAndPasswordMatch(user.Password, payload.Password)
-	// if err != nil || !match {
-	// 	return c.NoContent(http.StatusUnauthorized)
-	// }
 
 	if user.TwoFactorEnabled {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "2FA is already enabled"})
 	}
 
-	// Generate secret
 	secret := generateTOTPSecret()
 	
-	// Generate backup codes
 	backupCodes := generateBackupCodes(10)
 	backupCodesStr := strings.Join(backupCodes, ",")
 
-	// Update user
 	if err := s.Users.UpdateUser2FA(ctx, userID, true, secret); err != nil {
 		lgr.Error("failed to enable 2FA for user", zap.Error(err))
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Update backup codes
 	user.TwoFactorBackupCodes = backupCodesStr
 	if err := s.Users.UpdateUser(ctx, user); err != nil {
 		lgr.Error("failed to update backup codes", zap.Error(err))
 	}
 
-	// Generate QR code URL
 	qrCodeURL := generateQRCodeURL(user.Email, secret)
 
 	response := &Enable2FAResponse{
@@ -111,7 +101,6 @@ func (s *service) PostDisable2FA(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	// Get user from context
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
 		return c.NoContent(http.StatusUnauthorized)
@@ -127,18 +116,15 @@ func (s *service) PostDisable2FA(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "2FA is not enabled"})
 	}
 
-	// Verify 2FA code
 	if !verifyTOTPCode(user.TwoFactorSecret, payload.Code) {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid 2FA code"})
 	}
 
-	// Disable 2FA
 	if err := s.Users.UpdateUser2FA(ctx, userID, false, ""); err != nil {
 		lgr.Error("failed to disable 2FA for user", zap.Error(err))
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Clear backup codes
 	user.TwoFactorBackupCodes = ""
 	if err := s.Users.UpdateUser(ctx, user); err != nil {
 		lgr.Error("failed to clear backup codes", zap.Error(err))
@@ -168,16 +154,13 @@ func (s *service) PostVerify2FA(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "2FA is not enabled"})
 	}
 
-	// Verify TOTP code or backup code
 	valid := verifyTOTPCode(user.TwoFactorSecret, payload.Code)
 	
 	if !valid {
-		// Check if it's a backup code
 		backupCodes := strings.Split(user.TwoFactorBackupCodes, ",")
 		for i, code := range backupCodes {
 			if code == payload.Code {
-				// Remove used backup code
-				backupCodes = append(backupCodes[:i], backupCodes[i+1:]...)
+					backupCodes = append(backupCodes[:i], backupCodes[i+1:]...)
 				user.TwoFactorBackupCodes = strings.Join(backupCodes, ",")
 				s.Users.UpdateUser(ctx, user)
 				valid = true
@@ -190,7 +173,6 @@ func (s *service) PostVerify2FA(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid 2FA code"})
 	}
 
-	// Generate JWT tokens
 	jwt, err := s.generateTokens(&TokenContext{UserID: float64(user.ID)})
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
@@ -199,7 +181,6 @@ func (s *service) PostVerify2FA(c echo.Context) error {
 	return c.JSON(http.StatusOK, jwt)
 }
 
-// Helper functions
 func generateTOTPSecret() string {
 	bytes := make([]byte, 20)
 	rand.Read(bytes)
@@ -221,26 +202,19 @@ func generateQRCodeURL(email, secret string) string {
 }
 
 func verifyTOTPCode(secret, code string) bool {
-	// Simple TOTP verification - in production, use a proper TOTP library
-	// This is a simplified implementation for demonstration
 	if len(code) != 6 {
 		return false
 	}
 	
-	// For demo purposes, accept any 6-digit code
 	_, err := strconv.Atoi(code)
 	return err == nil
 }
 
 func getUserIDFromContext(c echo.Context) (uint, error) {
-	// This should extract user ID from JWT token in the context
-	// For now, return a placeholder implementation
 	claims := c.Get("user")
 	if claims == nil {
 		return 0, fmt.Errorf("no user in context")
 	}
 	
-	// Extract user ID from claims - this depends on your JWT implementation
-	// For now, return a dummy value
 	return 1, nil
 }

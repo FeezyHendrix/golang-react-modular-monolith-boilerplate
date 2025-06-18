@@ -29,7 +29,6 @@ func (s *service) PostResetPassword(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	// Find user by reset token
 	var user models.User
 	err := s.Database.Conn.Where("password_reset_token = ? AND password_reset_expires_at > ?", 
 		payload.Token, time.Now()).First(&user).Error
@@ -42,14 +41,12 @@ func (s *service) PostResetPassword(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Hash new password
 	hashedPassword, err := passwords.GenerateHashFromPassword(payload.NewPassword)
 	if err != nil {
 		lgr.Error("failed to hash new password", zap.Error(err))
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Update user password and clear reset token
 	user.Password = string(hashedPassword)
 	user.PasswordResetToken = ""
 	user.PasswordResetExpiresAt = time.Time{}

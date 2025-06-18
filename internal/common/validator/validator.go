@@ -102,7 +102,6 @@ func getErrorMessage(err validator.FieldError) string {
 	}
 }
 
-// Helper method. I think this should be standard part of the echo library
 func BindAndValidate(c echo.Context, i any) error {
 	if err := c.Bind(i); err != nil {
 		return err
@@ -117,17 +116,14 @@ const (
 	requestPayloadCtxKey = requestPayloadKey("RequestValidatorMW__payload-key")
 )
 
-// NewValidator creates a new validator with custom validation rules
 func NewValidator() *CustomValidator {
 	validate := validator.New()
 	
-	// Register custom validation functions
 	validate.RegisterValidation("strong_password", validateStrongPassword)
 	validate.RegisterValidation("role_name", validateRoleName)
 	validate.RegisterValidation("permission_name", validatePermissionName)
 	validate.RegisterValidation("jwt", validateJWT)
 	
-	// Register JSON tag name function
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
 		if name == "-" {
@@ -139,7 +135,6 @@ func NewValidator() *CustomValidator {
 	return &CustomValidator{Validator: validate}
 }
 
-// Custom validation functions
 func validateStrongPassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 	if len(password) < 8 {
@@ -160,21 +155,18 @@ func validateRoleName(fl validator.FieldLevel) bool {
 		return false
 	}
 	
-	// Allow letters, numbers, spaces, and hyphens
 	matched, _ := regexp.MatchString(`^[a-zA-Z0-9\s\-]+$`, name)
 	return matched
 }
 
 func validatePermissionName(fl validator.FieldLevel) bool {
 	name := fl.Field().String()
-	// Permission format: resource:action
 	matched, _ := regexp.MatchString(`^[a-z]+:[a-z]+$`, name)
 	return matched
 }
 
 func validateJWT(fl validator.FieldLevel) bool {
 	token := fl.Field().String()
-	// Basic JWT format check (3 parts separated by dots)
 	parts := strings.Split(token, ".")
 	return len(parts) == 3
 }
@@ -185,7 +177,6 @@ func RequestValidatorMW(lgr *zap.Logger, payload any) echo.MiddlewareFunc {
 			if err := BindAndValidate(c, payload); err != nil {
 				lgr.Info("validation failed", zap.Any("payload", payload), zap.Error(err))
 				
-				// Return formatted validation errors
 				if validationErr, ok := err.(*ValidationErrors); ok {
 					return c.JSON(http.StatusBadRequest, map[string]interface{}{
 						"error":   "Validation failed",

@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-// Types
 export type DataSourceType = "Database" | "File" | "API" | "Document" | string;
 
 export interface DataSource {
@@ -42,7 +41,6 @@ export interface AuthState {
   user: UserProfile | null;
 }
 
-// App Data Store
 interface AppDataStore {
   dataSources: DataSource[];
   queries: QueryResult[];
@@ -114,7 +112,6 @@ export const useAppDataStore = create<AppDataStore>()(
   )
 );
 
-// Auth Store
 interface AuthStore extends AuthState {
   login: (accessToken: string, refreshToken: string, user: UserProfile) => void;
   logout: () => void;
@@ -170,7 +167,6 @@ export const useAuthStore = create<AuthStore>()(
   )
 );
 
-// Legacy User Store (for backward compatibility)
 export const useUserStore = create<{ user: UserProfile | null; setUser: (user: UserProfile | null) => void; setState: (user: UserProfile) => void }>()(
   (set) => ({
     user: null,

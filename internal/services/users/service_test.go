@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Mock database
 type mockDB struct {
 	db *gorm.DB
 }
@@ -26,7 +25,6 @@ func setupTestDB(t *testing.T) *mockDB {
 		t.Fatal("Failed to connect to test database:", err)
 	}
 
-	// Auto migrate the models
 	err = db.AutoMigrate(&models.User{})
 	if err != nil {
 		t.Fatal("Failed to migrate test database:", err)
@@ -52,7 +50,6 @@ func TestGetUserByEmail(t *testing.T) {
 	service, db := setupTestService(t)
 	ctx := context.Background()
 
-	// Create a test user
 	user := &models.User{
 		Email:    "test@example.com",
 		Name:     "Test User",
@@ -96,7 +93,6 @@ func TestGetUserByID(t *testing.T) {
 	service, db := setupTestService(t)
 	ctx := context.Background()
 
-	// Create a test user
 	user := &models.User{
 		Email:    "testid@example.com",
 		Name:     "Test ID User",
@@ -198,7 +194,6 @@ func TestUpdateUser(t *testing.T) {
 	service, db := setupTestService(t)
 	ctx := context.Background()
 
-	// Create a test user
 	user := &models.User{
 		Email:    "update@example.com",
 		Name:     "Original Name",
@@ -216,7 +211,6 @@ func TestUpdateUser(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		// Verify user was updated
 		var foundUser models.User
 		err = service.Database.Connection().Where("id = ?", user.ID).First(&foundUser).Error
 		if err != nil {
@@ -237,7 +231,6 @@ func TestUpdateUserPassword(t *testing.T) {
 	service, db := setupTestService(t)
 	ctx := context.Background()
 
-	// Create a test user
 	user := &models.User{
 		Email:    "password@example.com",
 		Name:     "Password User",
@@ -254,7 +247,6 @@ func TestUpdateUserPassword(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		// Verify password was updated
 		var foundUser models.User
 		err = service.Database.Connection().Where("id = ?", user.ID).First(&foundUser).Error
 		if err != nil {
@@ -278,7 +270,6 @@ func TestUpdateUser2FA(t *testing.T) {
 	service, db := setupTestService(t)
 	ctx := context.Background()
 
-	// Create a test user
 	user := &models.User{
 		Email:            "2fa@example.com",
 		Name:             "2FA User",
@@ -297,7 +288,6 @@ func TestUpdateUser2FA(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		// Verify 2FA was enabled
 		var foundUser models.User
 		err = service.Database.Connection().Where("id = ?", user.ID).First(&foundUser).Error
 		if err != nil {
@@ -319,7 +309,6 @@ func TestUpdateUser2FA(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		// Verify 2FA was disabled
 		var foundUser models.User
 		err = service.Database.Connection().Where("id = ?", user.ID).First(&foundUser).Error
 		if err != nil {

@@ -27,26 +27,22 @@ func (s *service) PostForgotPassword(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	// Get user by email
 	user, err := s.Users.GetUserByEmail(ctx, payload.Email)
 	if err != nil {
 		lgr.Error("failed to get user by email", zap.Error(err))
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Even if user doesn't exist, return success to prevent email enumeration
 	if user == nil {
 		return c.JSON(http.StatusOK, map[string]string{"message": "If the email exists, a reset link has been sent"})
 	}
 
-	// Generate reset token
 	resetToken, err := generateResetToken()
 	if err != nil {
 		lgr.Error("failed to generate reset token", zap.Error(err))
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Update user with reset token and expiration
 	user.PasswordResetToken = resetToken
 	user.PasswordResetExpiresAt = time.Now().Add(time.Hour) // 1 hour expiration
 
@@ -55,7 +51,6 @@ func (s *service) PostForgotPassword(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Send password reset email
 	if err := s.Email.SendPasswordResetEmail(ctx, user.Email, user.Name, resetToken); err != nil {
 		lgr.Error("failed to send password reset email", zap.Error(err))
 		return c.NoContent(http.StatusInternalServerError)

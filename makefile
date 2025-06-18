@@ -2,37 +2,24 @@
 .FORCE:
 .DEFAULT_GOAL := help
 
-# =============================================================================
-# Configuration
-# =============================================================================
-
-# Path vars
 PROJECT_DIR = $(shell pwd -L)
 BIN_DIR     = $(PROJECT_DIR)/bin
 SPA_DIR     = $(PROJECT_DIR)/spa
 
-# Files
 SERVER_TEST_DIRECTORIES := $(shell go list ./... | grep -v /vendor/ | grep -v mocks)
 
-# Build vars
 VERSION     ?= $(shell git describe --tags --always --dirty)
 COMMIT_HASH := $(shell git rev-parse HEAD)
 BUILD_TIME  := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
-# Docker vars
 DOCKER_REGISTRY ?= 
 DOCKER_IMAGE    ?= echo-boilerplate
 DOCKER_TAG      ?= $(VERSION)
 
-# Tools need to be enumerated here in order to support installing them.
 TOOLS :=
 TOOLS := $(TOOLS) github.com/swaggo/swag/cmd/swag@v1.16.4
 TOOLS := $(TOOLS) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
 TOOLS := $(TOOLS) github.com/cosmtrek/air@v1.49.0
-
-# =============================================================================
-# Help
-# =============================================================================
 
 .PHONY: help
 help: ## Show this help message
@@ -40,10 +27,6 @@ help: ## Show this help message
 	@echo ''
 	@echo 'Available targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-
-# =============================================================================
-# Development
-# =============================================================================
 
 .PHONY: dev
 dev: ## Run both server and spa projects locally using Docker
@@ -80,10 +63,6 @@ dev-spa: ## Run SPA development server
 dev-db: ## Start only the database for local development
 	docker compose -f docker-compose.dev.yml up postgres -d
 
-# =============================================================================
-# Building
-# =============================================================================
-
 .PHONY: build
 build: build-server build-spa ## Build both server and SPA
 
@@ -105,10 +84,6 @@ build-docker: ## Build Docker images
 	docker build -t $(DOCKER_IMAGE):$(DOCKER_TAG) .
 	docker build -f Dockerfile.server -t $(DOCKER_IMAGE)-server:$(DOCKER_TAG) .
 	docker build -f Dockerfile.spa -t $(DOCKER_IMAGE)-spa:$(DOCKER_TAG) ./spa
-
-# =============================================================================
-# Testing
-# =============================================================================
 
 .PHONY: test
 test: test-server test-spa ## Run all tests
@@ -137,10 +112,6 @@ test-integration: ## Run integration tests
 test-e2e: ## Run end-to-end tests
 	@echo "Running E2E tests..."
 	cd $(SPA_DIR) && npm run test:e2e
-
-# =============================================================================
-# Code Quality
-# =============================================================================
 
 .PHONY: lint
 lint: lint-server lint-spa ## Run all linters
@@ -172,10 +143,6 @@ fmt-spa: ## Format SPA code
 .PHONY: check
 check: fmt lint test ## Run formatting, linting, and tests
 
-# =============================================================================
-# Dependencies
-# =============================================================================
-
 .PHONY: deps
 deps: deps-server deps-spa ## Install all dependencies
 
@@ -206,10 +173,6 @@ install-tools: ## Install development tools
 		go install $$tool; \
 	done
 
-# =============================================================================
-# Database
-# =============================================================================
-
 .PHONY: db-migrate
 db-migrate: ## Run database migrations
 	@echo "Running database migrations..."
@@ -236,23 +199,13 @@ db-backup: ## Backup database
 db-console: ## Connect to database console
 	docker compose -f docker-compose.dev.yml exec postgres psql -U postgres -d echoboilerplate_dev
 
-# =============================================================================
-# Deployment
-# =============================================================================
-
 .PHONY: deploy-staging
 deploy-staging: build-docker ## Deploy to staging environment
 	@echo "Deploying to staging..."
-	# Add your staging deployment commands here
 
 .PHONY: deploy-prod
 deploy-prod: build-docker ## Deploy to production environment
 	@echo "Deploying to production..."
-	# Add your production deployment commands here
-
-# =============================================================================
-# Utilities
-# =============================================================================
 
 .PHONY: clean
 clean: ## Clean build artifacts and temporary files
@@ -317,10 +270,6 @@ security-check: ## Run security checks
 		echo "⚠️  govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest"; \
 	fi
 
-# =============================================================================
-# Documentation
-# =============================================================================
-
 .PHONY: docs
 docs: ## Generate API documentation
 	@echo "Generating API documentation..."
@@ -330,10 +279,6 @@ docs: ## Generate API documentation
 docs-serve: docs ## Serve API documentation locally
 	@echo "Serving documentation at http://localhost:8080/swagger/index.html"
 	@echo "Start the server with 'make dev-server' to view docs"
-
-# =============================================================================
-# CI/CD Helpers
-# =============================================================================
 
 .PHONY: ci-setup
 ci-setup: ## Setup CI environment

@@ -7,8 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Request structs moved to validator/schemas.go
-// Use validator.CreateRoleRequest, validator.UpdateRoleRequest, etc.
 
 func (api *api) GetRoles(c echo.Context) error {
 	roles, err := api.permissionsService.GetRoles()

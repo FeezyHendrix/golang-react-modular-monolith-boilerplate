@@ -43,19 +43,16 @@ func RequestLoggerMiddleware() echo.MiddlewareFunc {
 				ClientIPAddr: req.Header.Get("X-FORWARDED-FOR"),
 			}
 
-			// client ip address
-			if reqLogCtx.ClientIPAddr == "" {
+					if reqLogCtx.ClientIPAddr == "" {
 				reqLogCtx.ClientIPAddr = req.RemoteAddr
 			}
 
-			// request id
-			reqLogCtx.ID = req.Header.Get(echo.HeaderXRequestID)
+					reqLogCtx.ID = req.Header.Get(echo.HeaderXRequestID)
 			if reqLogCtx.ID == "" {
 				reqLogCtx.ID = c.Response().Header().Get(echo.HeaderXRequestID)
 			}
 
-			// project id
-			reqLogCtx.ProjectID = c.Param("projectId")
+					reqLogCtx.ProjectID = c.Param("projectId")
 
 			if reqLogCtx.ID != "" {
 				c.Response().Header().Set(echo.HeaderXRequestID, reqLogCtx.ID)
@@ -67,7 +64,6 @@ func RequestLoggerMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-// ContextLogger returns a logger with all known context
 func ContextLogger(ctx context.Context, lgr *zap.Logger) *zap.Logger {
 	if lgr == nil {
 		return lgr
@@ -75,7 +71,6 @@ func ContextLogger(ctx context.Context, lgr *zap.Logger) *zap.Logger {
 
 	fields := []zapcore.Field{}
 
-	// extract http request context
 	cVal := ctx.Value(requestLogContextKey)
 	if cVal != nil {
 		lCtx := cVal.(*hTTPRequestLogContext)
@@ -100,7 +95,6 @@ func ContextLogger(ctx context.Context, lgr *zap.Logger) *zap.Logger {
 		}
 	}
 
-	// extract authenticated user context
 	usrCtx := authenticationcontext.ParseUserContext(ctx)
 	if usrCtx != nil {
 		usrID := fmt.Sprintf("%+v", usrCtx.UserID)
@@ -113,7 +107,6 @@ func ContextLogger(ctx context.Context, lgr *zap.Logger) *zap.Logger {
 func FuncExecTime(logger zap.Logger, env environment.EnvironmentType, fmtString string, args ...any) func() {
 	if env == environment.Production {
 		return func() {
-			// skip for production
 		}
 	}
 	start := time.Now()

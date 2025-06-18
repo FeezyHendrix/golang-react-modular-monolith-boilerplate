@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// PostSignUpRequest moved to validator/schemas.go as SignUpRequest
+
 
 func (s *service) PostSignUp(c echo.Context) error {
 	var payload validator.SignUpRequest
@@ -21,11 +21,9 @@ func (s *service) PostSignUp(c echo.Context) error {
 	ctx := req.Context()
 	lgr := logger.ContextLogger(ctx, s.Logger)
 
-	// Bind and validate request
 	if err := validator.BindAndValidate(c, &payload); err != nil {
 		lgr.Error("failed to bind and validate signup request", zap.Error(err))
 		
-		// Return validation errors in a structured format
 		if validationErr, ok := err.(*validator.ValidationErrors); ok {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
 				"error":   "Validation failed",
@@ -79,12 +77,10 @@ func (s *service) PostSignUp(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Send welcome email
 	if err := s.Email.SendWelcomeEmail(ctx, newUser.Email, newUser.Name); err != nil {
 		lgr.Error("failed to send welcome email", zap.Error(err))
 	}
 
-	// Send email confirmation
 	if err := s.Email.SendEmailConfirmation(ctx, newUser.Email, newUser.Name, emailConfirmToken); err != nil {
 		lgr.Error("failed to send email confirmation", zap.Error(err))
 	}
@@ -97,7 +93,6 @@ func (s *service) PostSignUp(c echo.Context) error {
 	return c.JSON(http.StatusOK, jwt)
 }
 
-// generateEmailConfirmToken generates a random token for email confirmation.
 func generateEmailConfirmToken() (string, error) {
 	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 	b := make([]byte, 6)

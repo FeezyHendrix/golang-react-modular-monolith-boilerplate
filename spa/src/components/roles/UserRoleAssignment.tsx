@@ -175,7 +175,7 @@ export function UserRoleAssignment({ userId, userName }: UserRoleAssignmentProps
                   variant="outline"
                   size="sm"
                   onClick={() => handleRemoveRole(role.id)}
-                  disabled={role.id <= 4} // Prevent removal of system roles
+                  disabled={role.id <= 4}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -188,19 +188,15 @@ export function UserRoleAssignment({ userId, userName }: UserRoleAssignmentProps
   );
 }
 
-// Component for managing all users' roles
 export function AllUsersRoleManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This would need to be implemented in the user API
-    // loadUsers();
     setLoading(false);
   }, []);
 
-  // Placeholder - would need actual user API
   const mockUsers: User[] = [
     { id: 1, name: 'John Doe', email: 'john@example.com' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com' },

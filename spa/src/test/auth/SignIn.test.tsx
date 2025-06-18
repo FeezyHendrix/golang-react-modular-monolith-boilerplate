@@ -5,13 +5,11 @@ import { BrowserRouter } from 'react-router-dom'
 import SignIn from '../../pages/auth/SignIn'
 import * as authAPI from '../../api/auth'
 
-// Mock the auth API
 vi.mock('../../api/auth', () => ({
   loginRequest: vi.fn(),
   verify2FARequest: vi.fn(),
 }))
 
-// Mock react-router-dom navigation
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
@@ -21,7 +19,6 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-// Mock the toast hook
 const mockToast = vi.fn()
 vi.mock('../../hooks/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
@@ -139,7 +136,6 @@ describe('SignIn Component', () => {
   it('handles 2FA verification', async () => {
     const user = userEvent.setup()
     
-    // First, trigger 2FA mode
     const loginError = { response: { status: 403 } }
     vi.mocked(authAPI.loginRequest).mockRejectedValue(loginError)
     
@@ -153,12 +149,10 @@ describe('SignIn Component', () => {
     await user.type(passwordInput, 'password123')
     await user.click(submitButton)
     
-    // Wait for 2FA form to appear
     await waitFor(() => {
       expect(screen.getByLabelText('2FA Code')).toBeInTheDocument()
     })
     
-    // Mock successful 2FA verification
     const mock2FAResponse = {
       data: {
         access_token: 'fake-access-token',
@@ -167,7 +161,6 @@ describe('SignIn Component', () => {
     }
     vi.mocked(authAPI.verify2FARequest).mockResolvedValue(mock2FAResponse)
     
-    // Enter 2FA code
     const twoFactorInput = screen.getByLabelText('2FA Code')
     const verifyButton = screen.getByRole('button', { name: /verify code/i })
     
@@ -189,7 +182,6 @@ describe('SignIn Component', () => {
   it('can go back from 2FA form to login form', async () => {
     const user = userEvent.setup()
     
-    // Trigger 2FA mode
     const loginError = { response: { status: 403 } }
     vi.mocked(authAPI.loginRequest).mockRejectedValue(loginError)
     
@@ -203,16 +195,13 @@ describe('SignIn Component', () => {
     await user.type(passwordInput, 'password123')
     await user.click(submitButton)
     
-    // Wait for 2FA form
     await waitFor(() => {
       expect(screen.getByText('Enter 2FA Code')).toBeInTheDocument()
     })
     
-    // Click back button
     const backButton = screen.getByRole('button', { name: /back to login/i })
     await user.click(backButton)
     
-    // Should be back to login form
     expect(screen.getByText('Sign in to your account')).toBeInTheDocument()
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()

@@ -25,7 +25,6 @@ const SignUp: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validation
     if (!email || !password || !name) {
       toast({
         title: "Error",
@@ -36,7 +35,6 @@ const SignUp: React.FC = () => {
       return;
     }
 
-    // Simulate signup process
     try {
        const { data } = await signupRequest({email, password, name});
        if (data) {

@@ -34,7 +34,6 @@ type User = {
 
 const Users: React.FC = () => {
   const { toast } = useToast();
-  // Sample user data - would come from an API in a real app
   const [users, setUsers] = useState<User[]>([
     { id: 1, name: "John Doe", email: "john@example.com", role: "Admin", status: "Active", lastActive: "Apr 9, 2025" },
     { id: 2, name: "Jane Smith", email: "jane@example.com", role: "Editor", status: "Active", lastActive: "Apr 10, 2025" },
@@ -55,7 +54,6 @@ const Users: React.FC = () => {
   const [currentEditUser, setCurrentEditUser] = useState<User | null>(null);
 
   const handleAddUser = () => {
-    // Validation
     if (!newUser.name || !newUser.email || !newUser.role) {
       toast({
         title: "Error",
@@ -65,7 +63,6 @@ const Users: React.FC = () => {
       return;
     }
 
-    // Add new user
     const newId = Math.max(...users.map(user => user.id)) + 1;
     setUsers([
       ...users,
@@ -79,7 +76,6 @@ const Users: React.FC = () => {
       }
     ]);
 
-    // Reset form
     setNewUser({
       name: "",
       email: "",
@@ -95,7 +91,6 @@ const Users: React.FC = () => {
   const handleEditUser = () => {
     if (!currentEditUser) return;
 
-    // Update user
     setUsers(users.map(user => 
       user.id === currentEditUser.id ? currentEditUser : user
     ));

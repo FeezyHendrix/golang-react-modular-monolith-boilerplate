@@ -10,8 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// Use the validator schema instead of local struct
-// type SigninPayload moved to validator/schemas.go as SignInRequest
 
 type Tokens struct {
 	AccessToken  string `json:"access_token"`
@@ -28,11 +26,9 @@ func (s *service) PostSignIn(c echo.Context) error {
 	ctx := req.Context()
 	lgr := logger.ContextLogger(ctx, s.Logger)
 
-	// Bind and validate request
 	if err := validator.BindAndValidate(c, &payload); err != nil {
 		lgr.Error("failed to bind and validate signin request", zap.Error(err))
 		
-		// Return validation errors in a structured format
 		if validationErr, ok := err.(*validator.ValidationErrors); ok {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
 				"error":   "Validation failed",

@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router-dom'
 import Dashboard from '../pages/Dashboard'
 
-// Mock react-router-dom navigation
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
@@ -14,7 +13,6 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-// Mock the toast hook
 const mockToast = vi.fn()
 vi.mock('../hooks/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
@@ -117,14 +115,11 @@ describe('Dashboard Component', () => {
   })
 
   it('shows correct 2FA status when enabled', () => {
-    // Mock user with 2FA enabled
     const originalConsole = console.error
     console.error = vi.fn()
     
-    // Since we can't easily mock the useState hook, we'll test the rendered output
     renderDashboard()
     
-    // The component should show "Disabled" by default as per the hardcoded user state
     expect(screen.getByText('Disabled')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /enable 2fa/i })).toBeInTheDocument()
     
@@ -134,10 +129,8 @@ describe('Dashboard Component', () => {
   it('displays last login time', () => {
     renderDashboard()
     
-    // Should show a date/time for last login
     expect(screen.getByText('Last Login')).toBeInTheDocument()
     
-    // The specific date format will depend on locale, but should contain date info
     const lastLoginElement = screen.getByText('Last Login').parentElement
     expect(lastLoginElement).toBeInTheDocument()
   })
@@ -145,10 +138,8 @@ describe('Dashboard Component', () => {
   it('has proper navigation structure', () => {
     renderDashboard()
     
-    // Check that the main navigation elements are present
     expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument()
     
-    // Check that demo content is properly structured
     expect(screen.getByText('Echo Boilerplate Demo')).toBeInTheDocument()
   })
 })

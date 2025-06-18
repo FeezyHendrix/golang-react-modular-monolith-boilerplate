@@ -20,7 +20,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Mock email service
 type mockEmailService struct{}
 
 func (m *mockEmailService) SendPasswordResetEmail(ctx context.Context, to, name, resetToken string) error {
@@ -39,7 +38,6 @@ func (m *mockEmailService) SendEmailConfirmation(ctx context.Context, to, name, 
 	return nil
 }
 
-// Mock database
 type mockDB struct {
 	db *gorm.DB
 }
@@ -54,7 +52,6 @@ func setupTestDB(t *testing.T) *mockDB {
 		t.Fatal("Failed to connect to test database:", err)
 	}
 
-	// Auto migrate the models
 	err = db.AutoMigrate(&models.User{})
 	if err != nil {
 		t.Fatal("Failed to migrate test database:", err)
@@ -121,7 +118,6 @@ func TestPostSignUp(t *testing.T) {
 			t.Fatalf("Expected status 200, got %d", rec.Code)
 		}
 
-		// Verify user was created
 		var user models.User
 		err = service.Database.Connection().Where("email = ?", payload.Email).First(&user).Error
 		if err != nil {
@@ -134,7 +130,6 @@ func TestPostSignUp(t *testing.T) {
 	})
 
 	t.Run("duplicate email signup", func(t *testing.T) {
-		// Create a user first
 		user := &models.User{
 			Email:    "duplicate@example.com",
 			Name:     "Existing User",
@@ -185,7 +180,6 @@ func TestPostSignIn(t *testing.T) {
 	service, _ := setupTestService(t)
 	e := echo.New()
 
-	// Create a test user
 	user := &models.User{
 		Email:    "signin@example.com",
 		Name:     "Sign In User",
@@ -215,7 +209,6 @@ func TestPostSignIn(t *testing.T) {
 			t.Fatalf("Expected status 200, got %d", rec.Code)
 		}
 
-		// Verify response contains tokens
 		var response Tokens
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		if err != nil {
@@ -276,7 +269,6 @@ func TestPostForgotPassword(t *testing.T) {
 	service, _ := setupTestService(t)
 	e := echo.New()
 
-	// Create a test user
 	user := &models.User{
 		Email:    "forgot@example.com",
 		Name:     "Forgot User",
@@ -305,7 +297,6 @@ func TestPostForgotPassword(t *testing.T) {
 			t.Fatalf("Expected status 200, got %d", rec.Code)
 		}
 
-		// Verify user has reset token
 		var updatedUser models.User
 		service.Database.Connection().Where("email = ?", payload.Email).First(&updatedUser)
 		if updatedUser.PasswordResetToken == "" {
@@ -333,7 +324,6 @@ func TestPostForgotPassword(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		// Should still return 200 to prevent email enumeration
 		if rec.Code != http.StatusOK {
 			t.Fatalf("Expected status 200, got %d", rec.Code)
 		}
@@ -344,7 +334,6 @@ func TestPostResetPassword(t *testing.T) {
 	service, _ := setupTestService(t)
 	e := echo.New()
 
-	// Create a test user with reset token
 	resetToken := "valid-reset-token"
 	user := &models.User{
 		Email:                  "reset@example.com",
@@ -377,7 +366,6 @@ func TestPostResetPassword(t *testing.T) {
 			t.Fatalf("Expected status 200, got %d", rec.Code)
 		}
 
-		// Verify password was changed and token was cleared
 		var updatedUser models.User
 		service.Database.Connection().Where("email = ?", user.Email).First(&updatedUser)
 		if updatedUser.Password == "oldpassword" {
@@ -411,7 +399,6 @@ func TestPostResetPassword(t *testing.T) {
 	})
 
 	t.Run("expired token", func(t *testing.T) {
-		// Create user with expired token
 		expiredToken := "expired-token"
 		expiredUser := &models.User{
 			Email:                  "expired@example.com",

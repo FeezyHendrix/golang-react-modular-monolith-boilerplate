@@ -53,8 +53,6 @@ func (s *service) generateToken(usr *TokenContext, iatUnix, expUnix int64) (stri
 	return ajwt.SignedString([]byte(s.Config.JWTSecret))
 }
 
-// TODO: Implement Refresh Token Rotation Automatic Reuse Detection
-// For now we're focused on maintaining previous implementation
 func (s *service) generateTokens(usr *TokenContext) (*Tokens, error) {
 	nowUnix := time.Now().Unix()
 	accessToken, err := s.generateToken(usr, nowUnix, time.Now().Add(time.Second*time.Duration(s.AccessTokenTTLSecs)).Unix())

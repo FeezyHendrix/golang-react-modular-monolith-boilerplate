@@ -93,16 +93,7 @@ func TestStrongPasswordValidation(t *testing.T) {
 		{"SecurePass123!", true},
 		{"Password1!", true},
 		{"ComplexP@ss1", true},
-		{"password", false},      // no uppercase, no number, no special
-		{"PASSWORD", false},      // no lowercase, no number, no special
-		{"Password", false},      // no number, no special
-		{"Password1", false},     // no special
-		{"Password!", false},     // no number
-		{"12345678", false},      // no letters, no special
-		{"!@#$%^&*", false},      // no letters, no numbers
-		{"Pass1!", false},        // too short
-		{"", false},              // empty
-	}
+		{"password", false},		{"PASSWORD", false},		{"Password", false},		{"Password1", false},		{"Password!", false},		{"12345678", false},		{"!@#$%^&*", false},		{"Pass1!", false},		{"", false},	}
 
 	for _, tt := range tests {
 		t.Run(tt.password, func(t *testing.T) {
@@ -123,12 +114,7 @@ func TestRoleNameValidation(t *testing.T) {
 		{"Team-Lead", true},
 		{"User123", true},
 		{"Manager Role", true},
-		{"A", false},                    // too short
-		{strings.Repeat("A", 51), false}, // too long
-		{"Role@Special", false},         // invalid characters
-		{"Role#Test", false},            // invalid characters
-		{"", false},                     // empty
-	}
+		{"A", false},            		{strings.Repeat("A", 51), false}, 		{"Role@Special", false},         		{"Role#Test", false},            		{"", false},       	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -148,15 +134,7 @@ func TestPermissionNameValidation(t *testing.T) {
 		{"role:write", true},
 		{"system:admin", true},
 		{"report:delete", true},
-		{"User:Read", false},     // uppercase not allowed
-		{"user-read", false},     // hyphen not allowed
-		{"user_read", false},     // underscore not allowed
-		{"user:read:extra", false}, // too many parts
-		{"user", false},          // missing action
-		{":read", false},         // missing resource
-		{"user:", false},         // missing action
-		{"", false},              // empty
-	}
+		{"User:Read", false},     		{"user-read", false},     		{"user_read", false},     		{"user:read:extra", false}, 		{"user", false},          		{":read", false},         		{"user:", false},         		{"", false},	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -171,8 +149,7 @@ func TestValidationErrorFormatting(t *testing.T) {
 	validator := NewValidator()
 	
 	input := SignUpRequest{
-		Name:     "A", // too short
-		Email:    "invalid-email",
+		Name:     "A", 		Email:    "invalid-email",
 		Password: "weak",
 	}
 	
@@ -182,8 +159,7 @@ func TestValidationErrorFormatting(t *testing.T) {
 	validationErr, ok := err.(*ValidationErrors)
 	require.True(t, ok)
 	
-	assert.Len(t, validationErr.Errors, 3) // name, email, password errors
-	
+	assert.Len(t, validationErr.Errors, 3) 	
 	// Check that errors contain proper messages
 	fieldErrors := make(map[string]ValidationError)
 	for _, e := range validationErr.Errors {
@@ -360,9 +336,7 @@ func TestValidateEmailHelper(t *testing.T) {
 		expectErr bool
 	}{
 		{"valid@example.com", false},
-		{"", true},                           // empty
-		{strings.Repeat("a", 250) + "@example.com", true}, // too long
-	}
+		{"", true},             		{strings.Repeat("a", 250) + "@example.com", true}, 	}
 
 	for _, tt := range tests {
 		t.Run(tt.email, func(t *testing.T) {
@@ -382,11 +356,7 @@ func TestValidatePasswordHelper(t *testing.T) {
 		expectErr bool
 	}{
 		{"SecurePass123!", false},
-		{"", true},                      // empty
-		{"weak", true},                  // too short and weak
-		{strings.Repeat("a", 130), true}, // too long
-		{"Password1", true},             // missing special character
-	}
+		{"", true},        		{"weak", true},                  		{strings.Repeat("a", 130), true}, 		{"Password1", true},             	}
 
 	for _, tt := range tests {
 		t.Run(tt.password, func(t *testing.T) {
@@ -407,11 +377,7 @@ func TestValidateRoleNameHelper(t *testing.T) {
 	}{
 		{"Admin", false},
 		{"Super Admin", false},
-		{"", true},                         // empty
-		{"A", true},                        // too short
-		{strings.Repeat("A", 51), true},    // too long
-		{"Role@Special", true},             // invalid characters
-	}
+		{"", true},           		{"A", true},                		{strings.Repeat("A", 51), true},    		{"Role@Special", true},             	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

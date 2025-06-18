@@ -7,7 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// ErrorHandlerMiddleware creates a middleware for handling validation and other errors
 func ErrorHandlerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -20,9 +19,7 @@ func ErrorHandlerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	}
 }
 
-// handleError processes different types of errors and returns appropriate responses
 func handleError(c echo.Context, err error, logger *zap.Logger) error {
-	// Handle validation errors
 	if validationErr, ok := err.(*ValidationErrors); ok {
 		logger.Info("validation error",
 			zap.String("path", c.Request().URL.Path),
@@ -36,7 +33,6 @@ func handleError(c echo.Context, err error, logger *zap.Logger) error {
 		})
 	}
 
-	// Handle echo HTTP errors
 	if httpErr, ok := err.(*echo.HTTPError); ok {
 		logger.Info("http error",
 			zap.String("path", c.Request().URL.Path),
@@ -45,12 +41,10 @@ func handleError(c echo.Context, err error, logger *zap.Logger) error {
 			zap.Any("message", httpErr.Message),
 		)
 		
-		// Format the response consistently
 		response := map[string]interface{}{
 			"error": httpErr.Message,
 		}
 		
-		// Add internal details for development environments
 		if httpErr.Internal != nil {
 			response["details"] = httpErr.Internal.Error()
 		}
@@ -58,7 +52,6 @@ func handleError(c echo.Context, err error, logger *zap.Logger) error {
 		return c.JSON(httpErr.Code, response)
 	}
 
-	// Handle generic errors
 	logger.Error("internal server error",
 		zap.String("path", c.Request().URL.Path),
 		zap.String("method", c.Request().Method),
@@ -70,7 +63,6 @@ func handleError(c echo.Context, err error, logger *zap.Logger) error {
 	})
 }
 
-// RequestLoggingMiddleware logs incoming requests with validation context
 func RequestLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -89,18 +81,15 @@ func RequestLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	}
 }
 
-// SecurityValidationMiddleware adds security-related validation
 func SecurityValidationMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			req := c.Request()
 			
-			// Check content length limits
-			if req.ContentLength > 10*1024*1024 { // 10MB limit
+			if req.ContentLength > 10*1024*1024 {
 				return echo.NewHTTPError(http.StatusRequestEntityTooLarge, "Request body too large")
 			}
 			
-			// Check for suspicious patterns in URL
 			path := req.URL.Path
 			if containsSuspiciousPatterns(path) {
 				return echo.NewHTTPError(http.StatusBadRequest, "Invalid request path")
@@ -111,7 +100,6 @@ func SecurityValidationMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-// containsSuspiciousPatterns checks for common attack patterns
 func containsSuspiciousPatterns(path string) bool {
 	suspiciousPatterns := []string{
 		"../",
@@ -148,15 +136,9 @@ func containsSuspiciousPatterns(path string) bool {
 	return false
 }
 
-// RateLimitValidationMiddleware validates rate limiting headers and context
 func RateLimitValidationMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// This is a placeholder for rate limiting validation
-			// In a real implementation, you would check against a rate limiter
-			// like Redis or in-memory store
-			
-			// For now, just add rate limit headers
 			c.Response().Header().Set("X-RateLimit-Limit", "1000")
 			c.Response().Header().Set("X-RateLimit-Remaining", "999")
 			c.Response().Header().Set("X-RateLimit-Reset", "3600")
@@ -166,14 +148,11 @@ func RateLimitValidationMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-// CORSValidationMiddleware validates CORS requests with proper validation
 func CORSValidationMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			origin := c.Request().Header.Get("Origin")
 			
-			// Validate origin against whitelist in production
-			// For development, we allow localhost
 			allowedOrigins := []string{
 				"http://localhost:3000",
 				"http://localhost:8080",
@@ -193,7 +172,6 @@ func CORSValidationMiddleware() echo.MiddlewareFunc {
 				return echo.NewHTTPError(http.StatusForbidden, "Origin not allowed")
 			}
 			
-			// Set CORS headers
 			if origin != "" && isAllowed {
 				c.Response().Header().Set("Access-Control-Allow-Origin", origin)
 				c.Response().Header().Set("Access-Control-Allow-Credentials", "true")

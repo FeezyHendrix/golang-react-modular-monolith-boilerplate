@@ -64,12 +64,8 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				insight: {
-					DEFAULT: '#10B981', // Green-500
-					foreground: '#FFFFFF',
-					secondary: '#2563EB', // Blue-600
-					accent: '#F59E0B', // Amber-400
-					error: '#EF4444', // Red-500
-				}
+					DEFAULT: '#10B981', 					foreground: '#FFFFFF',
+					secondary: '#2563EB', 					accent: '#F59E0B', 					error: '#EF4444', 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

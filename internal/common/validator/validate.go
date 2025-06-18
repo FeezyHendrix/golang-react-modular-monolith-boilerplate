@@ -9,17 +9,10 @@ var (
 )
 
 
-func ValidatePhone( /*validator *validator.Validate,*/ phone string) (bool, error) {
-	// TODO: look into this
-	/*
-		if err := validator.Var(phone, "required,phone"); err != nil {
-			return false, nil
-		}
-	*/
+func ValidatePhone(phone string) (bool, error) {
 
 	if !phoneRegex.MatchString(phone) {
 		return false, nil
 	}
-
 	return true, nil
 }

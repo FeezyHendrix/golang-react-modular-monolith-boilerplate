@@ -32,7 +32,6 @@ const SignIn: React.FC = () => {
       setIsLoading(true);
 
       if (showTwoFactor) {
-        // Handle 2FA verification
         if (!twoFactorCode) {
           toast({
             title: "Error",
@@ -57,7 +56,6 @@ const SignIn: React.FC = () => {
           }
         }
       } else {
-        // Handle initial login
         if (!email || !password) {
           toast({
             title: "Error",
@@ -83,7 +81,6 @@ const SignIn: React.FC = () => {
             }
           }
         } catch (error: any) {
-          // Check if 2FA is required
           if (error.response?.status === 403) {
             setShowTwoFactor(true);
             toast({

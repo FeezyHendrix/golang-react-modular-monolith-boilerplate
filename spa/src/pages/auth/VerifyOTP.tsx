@@ -17,7 +17,6 @@ const VerifyOTP: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Allow any input (removed length validation)
     setTimeout(() => {
       setIsLoading(false);
       toast({

@@ -136,7 +136,7 @@ export function RoleManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeleteRole(role.id)}
-                    disabled={role.id <= 4} // Prevent deletion of system roles
+                    disabled={role.id <= 4}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
